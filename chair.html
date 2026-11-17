@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>War Room · Chair console</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="app.css?v=1794920160">
+</head>
+<body data-role="chair">
+<nav class="rail" aria-label="Console sections">
+  <span class="mark" id="mark" title="War Room"></span>
+  <button data-panel="situation" title="Situation" aria-label="Situation"></button>
+  <button data-panel="forces" title="Forces" aria-label="Forces"></button>
+  <button data-panel="movement" title="Warhead transfers" aria-label="Warhead transfers"></button>
+  <button data-panel="strike" title="Attack" aria-label="Attack"></button>
+  <button data-panel="zones" title="Zones" aria-label="Zones"></button>
+  <button data-panel="wire" title="News wire" aria-label="News wire"></button>
+  <button data-panel="scenario" title="Scenario" aria-label="Scenario"></button>
+  <span class="push"></span><span class="sep"></span>
+  <button id="soundBtn" title="Sound on this screen" aria-label="Sound on this screen"></button>
+  <button id="undoBtn" title="Undo last action" aria-label="Undo last action"></button>
+</nav>
+
+<aside class="panel">
+  <header><h1 id="ptitle">Situation</h1><p id="psub"></p></header>
+  <div class="selbar" id="selbar"></div>
+  <div class="scroll">
+
+    <section data-p="situation">
+      <h2>Readiness</h2>
+      <div class="ladder" id="ladder"></div>
+      <p id="defconNote" style="margin-top:8px"></p>
+      <h2>In flight and under way</h2>
+      <ul class="list" id="flightList"></ul>
+      <h2>Alarm</h2>
+      <div class="actions" style="margin-top:8px"><button class="btn" data-act="silence">Silence alarms</button><button class="btn" data-act="undo">Undo last action</button></div>
+      <h2>Delegate display</h2>
+      <p>The display is a separate window for the projector. Delegates can look, never change.</p>
+      <div class="actions" style="margin-top:8px"><button class="btn primary" data-act="openDisplay">Open delegate display</button><button class="btn" data-act="pushView">Send my view to it</button></div>
+      <div class="row"><div><label for="basemap">Map imagery</label><select id="basemap"><option value="live">Satellite, real day and night</option><option value="night">Night, city lights</option><option value="tactical">Tactical, flat</option></select></div></div>
+      <label class="check"><input type="checkbox" id="clouds"> Show live cloud cover</label>
+      <label class="check"><input type="checkbox" id="spin"> Slowly rotate the display when idle</label>
+      <label class="check"><input type="checkbox" id="autoFocus"> Turn the display to each new event</label>
+    </section>
+
+    <section data-p="forces" hidden>
+      <h2>Place a unit</h2>
+      <p>Click the globe where it should stand, then fill this in.</p>
+      <label for="uName">Name</label><input id="uName" placeholder="e.g. Fifth Fleet" autocomplete="off">
+      <div class="row"><div><label for="uCountry">Owner</label><input id="uCountry" list="countries" autocomplete="off"></div><div><label for="uType">Kind</label><select id="uType"></select></div></div>
+      <div class="row"><div><label for="uNukes">Warheads held</label><input id="uNukes" type="number" min="0" value="0"></div><div><label for="uVis">Who can see it</label><select id="uVis"><option value="public">Everyone</option><option value="owner">Owner only</option><option value="hidden">Chair only</option></select></div></div>
+      <div class="actions"><button class="btn primary" data-act="addUnit">Place at selected point</button></div>
+      <div id="unitCard"></div>
+      <h2>Forces on the map</h2>
+      <ul class="list" id="unitList"></ul>
+    </section>
+
+    <section data-p="movement" hidden>
+      <h2>Move warheads between units</h2>
+      <p>The convoy travels in real time. Any state may try to intercept it on the way.</p>
+      <div class="row"><div><label for="mFrom">From</label><select id="mFrom"></select></div><div><label for="mTo">To</label><select id="mTo"></select></div></div>
+      <div class="row"><div><label for="mN">Warheads</label><input id="mN" type="number" min="1" value="1"></div><div><label for="mSec">Transit, seconds</label><input id="mSec" type="number" min="5" value="120"></div></div>
+      <label class="check"><input type="checkbox" id="mCovert"> Covert: delegates do not see it</label>
+      <div class="actions"><button class="btn primary" data-act="transfer">Order transfer</button></div>
+      <h2>Convoys on the road</h2>
+      <ul class="list" id="moveList"></ul>
+    </section>
+
+    <section data-p="strike" hidden>
+      <h2>Compose an attack</h2>
+      <p>Pick the launching unit, click the target on the globe, then launch.</p>
+      <label for="sFrom">Launch from</label><select id="sFrom"></select>
+      <div class="row"><div><label for="sKind">Delivery</label><select id="sKind"></select></div><div><label for="sPay">Payload</label><select id="sPay"></select></div></div>
+      <div class="row" id="nukeRow"><div><label for="sKt">Yield, kilotons</label><input id="sKt" type="number" min="0.1" step="any" value="300" list="yields"></div><div><label for="sBurst">Burst</label><select id="sBurst"><option value="air">Air burst</option><option value="surface">Surface burst</option></select></div></div>
+      <div class="row" id="convRow"><div><label for="sN">Munitions in the salvo</label><input id="sN" type="number" min="1" value="8"></div></div>
+      <div class="row" id="empRow"><div><label for="sEmpH">Burst height, km</label><select id="sEmpH"><option>100</option><option selected>400</option></select></div></div>
+      <div class="row"><div><label for="sDef">Chance defences stop it, %</label><input id="sDef" type="number" min="0" max="100" value="45"></div><div><label for="sSec">On-screen time, seconds</label><input id="sSec" type="number" min="5" placeholder="automatic"></div></div>
+      <div class="preview"><h2>Projection</h2><dl class="kv" id="sPreview"></dl><p class="note" id="sNote"></p></div>
+      <div class="actions"><button class="btn danger" data-act="launch">Launch</button></div>
+      <datalist id="yields"><option value="0.3" label="Tactical"><option value="15" label="Hiroshima class"><option value="100"><option value="300"><option value="800"><option value="1200"><option value="5000"></datalist>
+    </section>
+
+    <section data-p="zones" hidden>
+      <h2>Mark a zone</h2>
+      <p>Click the centre on the globe first.</p>
+      <div class="row"><div><label for="zType">Kind</label><select id="zType"></select></div><div><label for="zR">Radius, km</label><input id="zR" type="number" min="1" value="300"></div></div>
+      <label for="zLabel">Label</label><input id="zLabel" placeholder="e.g. Strait of Hormuz" autocomplete="off">
+      <label for="zVis">Who can see it</label><select id="zVis"><option value="public">Everyone</option><option value="hidden">Chair only</option></select>
+      <div class="actions"><button class="btn primary" data-act="addZone">Add at selected point</button></div>
+      <h2>Zones on the map</h2>
+      <ul class="list" id="zoneList"></ul>
+      <h2>Strike sites</h2>
+      <ul class="list" id="impactList"></ul>
+    </section>
+
+    <section data-p="wire" hidden>
+      <h2>Send a news flash</h2>
+      <label for="nText">Headline</label><input id="nText" placeholder="What the room should read" autocomplete="off">
+      <div class="row"><div><label for="nTone">Tone</label><select id="nTone"><option value="">News</option><option value="warn">Warning</option><option value="bad">Critical</option></select></div><div><label for="nVis">Audience</label><select id="nVis"><option value="public">Everyone</option><option value="hidden">Chair note only</option></select></div></div>
+      <div class="actions"><button class="btn primary" data-act="news">Send</button></div>
+      <h2>Event log</h2>
+      <ul class="list" id="logList"></ul>
+    </section>
+
+    <section data-p="scenario" hidden>
+      <h2>Committee members</h2>
+      <p>Click a country on the globe, then add or remove it.</p>
+      <div class="actions" style="margin-top:8px"><button class="btn primary" data-act="toggleMember">Add or remove selected country</button></div>
+      <ul class="list" id="memberList" style="margin-top:8px"></ul>
+      <h2>Simulation settings</h2>
+      <div class="row"><div><label for="cCompress">Time compression</label><select id="cCompress"><option value="10">10 times faster</option><option value="30">30 times faster</option><option value="60">60 times faster</option><option value="120">120 times faster</option></select></div>
+        <div><label for="cWind">Wind blows toward</label><select id="cWind"><option value="0">North</option><option value="45">North-east</option><option value="90">East</option><option value="135">South-east</option><option value="180">South</option><option value="225">South-west</option><option value="270">West</option><option value="315">North-west</option></select></div></div>
+      <h2>Scenario file</h2>
+      <p>Save the whole map to a file, or load one prepared earlier.</p>
+      <div class="actions" style="margin-top:8px"><button class="btn" data-act="export">Save to file</button><button class="btn" data-act="import">Load from file</button></div>
+      <h2>Start over</h2>
+      <p>Wipes every unit, zone and strike and restores the placeholders.</p>
+      <div class="actions" style="margin-top:8px"><button class="btn danger" data-act="reset">Reset the map</button></div>
+      <input type="file" id="file" accept=".json" hidden>
+    </section>
+  </div>
+</aside>
+
+<main class="stage">
+  <div id="globe" data-ui></div><div id="overlay" data-ui></div><div id="flash"></div>
+  <div class="stage-top"><div class="tabs" id="modes" aria-label="Map mode"></div></div>
+  <div id="legend"></div>
+  <div id="strip"><ol></ol></div>
+</main>
+
+<datalist id="countries"></datalist>
+<dialog id="dlg"><form method="dialog"><h2 id="dTitle"></h2><p id="dText"></p><div id="dFields"></div><div class="actions"><button class="btn primary" value="ok" id="dOk">Confirm</button><button class="btn" value="cancel" formnovalidate>Cancel</button></div></form></dialog>
+
+<script src="vendor/globe.gl.min.js"></script>
+<script src="data/world.js?v=1794920160"></script>
+<script src="data/cities.js?v=1794920160"></script>
+<script src="core.js?v=1794920160"></script>
+<script src="fx.js?v=1794920160"></script>
+<script src="chair.js?v=1794920160"></script>
+</body>
+</html>
